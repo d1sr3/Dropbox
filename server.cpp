@@ -20,19 +20,19 @@ void error(const char *msg)
 }
 string lsi()
 {	
-	string tmp, s;
+	string temp, ls;
 	system("ls /home  > /home/ls.txt");
 	ifstream fin("/home/ls.txt");
 	while(!fin.eof())
 	{
-		getline(fin, tmp);
-		s += tmp + "\n";
+		getline(fin, temp);
+		ls += temp + "\n";
 	}
 	fin.close();
 	ofstream fout("/home/ls.txt",ofstream::out | ofstream::trunc);
 	fout.close();
-	s.erase(s.length()-5,s.length());
-	return s;
+	ls.erase(ls.length()-5,ls.length());
+	return ls;
 }
 bool safewrite(int, const string, size_t);
 rd saferead(int, char[], size_t);
@@ -46,7 +46,7 @@ int main()
 	socklen_t clilen;
 	char buffer[256];
 	struct sockaddr_in serv_addr, cli_addr;
-	string temp, tempB, ls = "", tempx; 
+	string temp, tempB, ls = "", tempx, tmp, tempB2, tempB3; 
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0) 
 		error("ERROR opening socket");
@@ -66,7 +66,7 @@ int main()
 		while(1)
 		{
 			if(menu(newsockfd)== 0) break;
-			re = saferead(newsockfd,const_cast<char*>(temp.c_str()),1);
+			re = saferead(newsockfd,const_cast<char*>(tmp.c_str()),1);
 			if(re.rtr == 0) break;
 			if(escape(re.r) == 1)
 			{
@@ -75,15 +75,15 @@ int main()
 			}
 			if(re.r[0] == '1')
 			{	
-				string l = lsi();
-				if(safewrite(newsockfd,l.c_str(),l.length()) == 0) break;
+				string m = lsi();
+				if(safewrite(newsockfd,m.c_str(),m.length()) == 0) break;
 			}
 			else if(re.r[0] == '2')
 			{
-				string f = "";
-				string g = "";
+				string s = "";
+				string temp2 = "";
 				if(safewrite(newsockfd,"Give me the file location : ",29) == 0) break;
-				re = saferead(newsockfd,const_cast<char*>(tempB.c_str()),256);
+				re = saferead(newsockfd,const_cast<char*>(tempB2.c_str()),256);
 				if(re.rtr == 0) break;
 				if(escape(re.r) == 0)
 				{
@@ -93,11 +93,11 @@ int main()
 						fin.clear();
 						while(!fin.eof())
 						{
-							getline(fin, f);
-							f+=g + "\n";
+							getline(fin, temp2);
+							s+=temp2 + "\n";
 						}
 						fin.close();
-						if(safewrite(newsockfd, f.c_str(), f.length()) == 0) break;
+						if(safewrite(newsockfd, s.c_str(), s.length()) == 0) break;
 					}
 				}
 			}
@@ -111,11 +111,11 @@ int main()
 				if(escape(re.r) == 0)
 				{
 					string name = re.r;
-					ls = lsi();
+					string l = lsi();
 					int i = 0;
-					while(ls[i] != '\0')
+					while(l[i] != '\0')
 					{
-						if(ls[i] == '\n')
+						if(l[i] == '\n')
 						{
 							if(temp == re.r)
 							{
@@ -142,7 +142,7 @@ int main()
 								temp = "";
 						}
 						else
-							temp += ls[i];
+							temp += l[i];
 						i++;
 					}
 					if(brk == 1)
@@ -212,7 +212,7 @@ int main()
 			{
 				memset(&re,'\0',sizeof(rd));
 				if(safewrite(newsockfd, "Select filename : ", 18) == 0) break;
-				re = saferead(newsockfd,const_cast<char*>(tempB.c_str()),256);
+				re = saferead(newsockfd,const_cast<char*>(tempB3.c_str()),256);
 				if(re.rtr == 0) break;
 				if(escape(re.r) == 0)
 				{
@@ -230,36 +230,38 @@ int main()
 
 	return 0;
 }
-bool safewrite(int socke, const string buffer, size_t size)
+bool safewrite(int newsockfd, const string buffer, size_t size)
 {
-	int n = write(socke, buffer.c_str(), size);
+	int n = write(newsockfd, buffer.c_str(), size);
 	if (n < 0) error("ERROR writing from socket");
 	else if (n == 0) return 0;
 	return 1;
 }
-rd saferead(int socke, char buffer[], size_t size)
+rd saferead(int newsockfd, char buffer[], size_t size)
 {
-	rd rem;
-	memset((char*)&rem,0,sizeof(rem));
-	int nm = read(socke,buffer,size);
-	if (nm < 0) error("ERROR reading from socket");
-	else if (nm == 0) rem.rtr = 0;
-	else rem.rtr = 1;
-	rem.r = buffer;
-	for(int i =0;i<rem.r.length();i++) 
+	rd re;
+	memset((char*)&re,0,sizeof(re));
+	int n = read(newsockfd,buffer,256);
+	if (n < 0) error("ERROR reading from socket");
+	else if (n == 0) re.rtr = 0;
+	else re.rtr = 1;
+	string x = buffer; 
+	string y;
+	re.r = x;
+	for(int i =0;i<re.r.length();i++) 
 	{
-		if(rem.r[i] == '\r')
+		if(re.r[i] == '\r')
 		{
-			rem.r[i] = '\0';
-			i = rem.r.length()+1;
+			re.r[i] = '\0';
+			i = re.r.length()+1;
 		}
 	}
-	return rem;
+	return re;
 }
-bool menu(int socke)
+bool menu(int newsockfd)
 {
 	string menu = "1 - List of files\n2 - Download file \n3 - upload file\n4 - delete file\n";
-	if(safewrite(socke, menu.c_str(), menu.length()) == 1)
+	if(safewrite(newsockfd, menu.c_str(), menu.length()) == 1)
 		return 1;
 	else return 0;
 }
