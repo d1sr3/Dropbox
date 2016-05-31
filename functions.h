@@ -48,7 +48,7 @@ rd saferead(int newsockfd, size_t size)
 	memset((char*)&re,0,sizeof(re));
 	int n = read(newsockfd,const_cast<char*>(buffer),256);
 	if (n < 0) error("ERROR reading from socket");
-	else if (n == 0) re.rtr = 0;
+	else if (n == 0) {re.rtr = 0;return re;}
 	else re.rtr = 1;
 	re.r = buffer;
 	for(int i =0;i<re.r.length();i++) 
