@@ -18,23 +18,8 @@ void error(const char *msg)
 	perror(msg);
 	exit(1);
 }
-string lsi()
-{	
-	string temp, ls;
-	system("ls /home  > /home/ls.txt");
-	ifstream fin("/home/ls.txt");
-	while(!fin.eof())
-	{
-		getline(fin, temp);
-		ls += temp + "\n";
-	}
-	fin.close();
-	ofstream fout("/home/ls.txt",ofstream::out | ofstream::trunc);
-	fout.close();
-	ls.erase(ls.length()-5,ls.length());
-	return ls;
-}
-bool safewrite(int, const string, size_t);
+string lsi();
+bool safewrite(int, const string);
 rd saferead(int, size_t);
 bool menu(int);
 bool escape(const string);
@@ -76,13 +61,13 @@ int main()
 			if(re.r[0] == '1')
 			{	
 				string m = lsi();
-				if(safewrite(newsockfd,m.c_str(),m.length()) == 0) break;
+				if(safewrite(newsockfd,m.c_str()) == 0) break;
 			}
 			else if(re.r[0] == '2')
 			{
 				string s = "";
 				string temp2 = "";
-				if(safewrite(newsockfd,"Give me the file location : ",29) == 0) break;
+				if(safewrite(newsockfd,"Give me the file location : ") == 0) break;
 				re = saferead(newsockfd,256);
 				if(re.rtr == 0) break;
 				if(escape(re.r) == 0)
@@ -97,7 +82,7 @@ int main()
 							s+=temp2 + "\n";
 						}
 						fin.close();
-						if(safewrite(newsockfd, s.c_str(), s.length()) == 0) break;
+						if(safewrite(newsockfd, s.c_str()) == 0) break;
 					}
 				}
 			}
@@ -105,7 +90,7 @@ int main()
 			{
 				bool stp = 0;
 				string temp = "";
-				if(safewrite(newsockfd, "Select filename : ", 18) == 0) break;
+				if(safewrite(newsockfd, "Select filename : ") == 0) break;
 				re = saferead(newsockfd,256);
 				if(re.rtr == 0) break;
 				if(escape(re.r) == 0)
@@ -119,7 +104,7 @@ int main()
 						{
 							if(temp == re.r)
 							{
-								if(safewrite(newsockfd, "Do you really want to rewrite this file?(y/n) : ", 48) == 0)
+								if(safewrite(newsockfd, "Do you really want to rewrite this file?(y/n) : ") == 0)
 								{
 									brk = 1;
 									break;
@@ -154,7 +139,7 @@ int main()
 					{
 						ofstream fout(name.c_str(),ofstream::out | ofstream::trunc);
 						fout.close();
-						if(safewrite(newsockfd, "Select file to upload : ", 24) == 0)
+						if(safewrite(newsockfd, "Select file to upload : ") == 0)
 						{
 							brk = 1;
 							break;
@@ -210,7 +195,7 @@ int main()
 			else if(re.r[0] == '4')
 			{
 				memset(&re,'\0',sizeof(rd));
-				if(safewrite(newsockfd, "Select filename : ", 18) == 0) break;
+				if(safewrite(newsockfd, "Select filename : ") == 0) break;
 				re = saferead(newsockfd,256);
 				if(re.rtr == 0) break;
 				if(escape(re.r) == 0)
@@ -229,9 +214,25 @@ int main()
 
 	return 0;
 }
-bool safewrite(int newsockfd, const string buffer, size_t size)
+string lsi()
+{	
+	string temp, ls;
+	system("ls /home  > /home/ls.txt");
+	ifstream fin("/home/ls.txt");
+	while(!fin.eof())
+	{
+		getline(fin, temp);
+		ls += temp + "\n";
+	}
+	fin.close();
+	ofstream fout("/home/ls.txt",ofstream::out | ofstream::trunc);
+	fout.close();
+	ls.erase(ls.length()-5,ls.length());
+	return ls;
+}
+bool safewrite(int newsockfd, const string buffer)
 {
-	int n = write(newsockfd, buffer.c_str(), size);
+	int n = write(newsockfd, buffer.c_str(), buffer.length());
 	if (n < 0) error("ERROR writing from socket");
 	else if (n == 0) return 0;
 	return 1;
@@ -259,7 +260,7 @@ rd saferead(int newsockfd, size_t size)
 bool menu(int newsockfd)
 {
 	string menu = "1 - List of files\n2 - Download file \n3 - upload file\n4 - delete file\n";
-	if(safewrite(newsockfd, menu.c_str(), menu.length()) == 1)
+	if(safewrite(newsockfd, menu.c_str()) == 1)
 		return 1;
 	else return 0;
 }
