@@ -29,7 +29,7 @@ int main()
 			if(re.rtr == 0) break;
 			if(escape(re.r) == 1)
 			{
-				inbrk = 1;
+			//	inbrk = 1;
 				break;
 			}
 			if(re.r[0] == '1')
@@ -179,8 +179,8 @@ int main()
 				}
 			}
 		}
-		if(inbrk == 1)
-			break;
+	/*	if(inbrk == 1)
+			break;*/
 	}
 		close(newsockfd);
 		close(sockfd);
