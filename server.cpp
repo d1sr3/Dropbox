@@ -35,7 +35,7 @@ string lsi()
 	return ls;
 }
 bool safewrite(int, const string, size_t);
-rd saferead(int, char[], size_t);
+rd saferead(int, size_t);
 bool menu(int);
 bool escape(const string);
 int main()
@@ -46,7 +46,7 @@ int main()
 	socklen_t clilen;
 	char buffer[256];
 	struct sockaddr_in serv_addr, cli_addr;
-	string temp, tempB, ls = "", tempx, tmp, tempB2, tempB3; 
+	string temp; 
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0) 
 		error("ERROR opening socket");
@@ -66,7 +66,7 @@ int main()
 		while(1)
 		{
 			if(menu(newsockfd)== 0) break;
-			re = saferead(newsockfd,const_cast<char*>(tmp.c_str()),1);
+			re = saferead(newsockfd,1);
 			if(re.rtr == 0) break;
 			if(escape(re.r) == 1)
 			{
@@ -83,7 +83,7 @@ int main()
 				string s = "";
 				string temp2 = "";
 				if(safewrite(newsockfd,"Give me the file location : ",29) == 0) break;
-				re = saferead(newsockfd,const_cast<char*>(tempB2.c_str()),256);
+				re = saferead(newsockfd,256);
 				if(re.rtr == 0) break;
 				if(escape(re.r) == 0)
 				{
@@ -106,7 +106,7 @@ int main()
 				bool stp = 0;
 				string temp = "";
 				if(safewrite(newsockfd, "Select filename : ", 18) == 0) break;
-				re = saferead(newsockfd,const_cast<char*>(tempB.c_str()),256);
+				re = saferead(newsockfd,256);
 				if(re.rtr == 0) break;
 				if(escape(re.r) == 0)
 				{
@@ -124,7 +124,7 @@ int main()
 									brk = 1;
 									break;
 								}
-								re = saferead(newsockfd,const_cast<char*>(tempx.c_str()),1);
+								re = saferead(newsockfd,1);
 								if(re.rtr = 0)
 								{
 									brk = 1;
@@ -154,7 +154,6 @@ int main()
 					{
 						ofstream fout(name.c_str(),ofstream::out | ofstream::trunc);
 						fout.close();
-						string ls = "";
 						if(safewrite(newsockfd, "Select file to upload : ", 24) == 0)
 						{
 							brk = 1;
@@ -164,7 +163,7 @@ int main()
 						while(1)
 						{
 							memset(&re,'\0',sizeof(rd));
-							re = saferead(newsockfd,const_cast<char*>(tempx.c_str()),256);
+							re = saferead(newsockfd,256);
 							if(re.rtr == 0)
 							{
 								brk = 1;
@@ -208,11 +207,11 @@ int main()
 					stp = 0;
 				}
 			}
-			else if(temp[0] == '4')
+			else if(re.r[0] == '4')
 			{
 				memset(&re,'\0',sizeof(rd));
 				if(safewrite(newsockfd, "Select filename : ", 18) == 0) break;
-				re = saferead(newsockfd,const_cast<char*>(tempB3.c_str()),256);
+				re = saferead(newsockfd,256);
 				if(re.rtr == 0) break;
 				if(escape(re.r) == 0)
 				{
@@ -237,17 +236,16 @@ bool safewrite(int newsockfd, const string buffer, size_t size)
 	else if (n == 0) return 0;
 	return 1;
 }
-rd saferead(int newsockfd, char buffer[], size_t size)
+rd saferead(int newsockfd, size_t size)
 {
+	char buffer[size];
 	rd re;
 	memset((char*)&re,0,sizeof(re));
-	int n = read(newsockfd,buffer,256);
+	int n = read(newsockfd,const_cast<char*>(buffer),256);
 	if (n < 0) error("ERROR reading from socket");
 	else if (n == 0) re.rtr = 0;
 	else re.rtr = 1;
-	string x = buffer; 
-	string y;
-	re.r = x;
+	re.r = buffer;
 	for(int i =0;i<re.r.length();i++) 
 	{
 		if(re.r[i] == '\r')
