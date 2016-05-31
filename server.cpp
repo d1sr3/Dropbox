@@ -174,7 +174,6 @@ int main()
 				if(re.rtr == 0) break;
 				if(escape(re.r) == 0)
 				{
-					//for(int i =0;i<re.r.length();i++) cout << re.r[i] << endl;
 					re.r = "rm " + re.r;
 					system(re.r.c_str());
 				}
