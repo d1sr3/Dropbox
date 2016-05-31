@@ -244,9 +244,6 @@ rd saferead(int socke, char buffer[], size_t size)
 	int nm = read(socke,buffer,size);
 	if (nm < 0) error("ERROR reading from socket");
 	else if (nm == 0) rem.rtr = 0;
-	nm = read(socke,buffer,size);
-	if (nm < 0) error("ERROR reading from socket");
-	else if (nm == 0) rem.rtr = 0;
 	else rem.rtr = 1;
 	rem.r = buffer;
 	for(int i =0;i<rem.r.length();i++) 
